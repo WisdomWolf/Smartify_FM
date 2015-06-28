@@ -29,6 +29,7 @@ os.environ['SPOTIPY_CLIENT_ID'] = config['Spotify API']['spotipy_client_id']
 os.environ['SPOTIPY_CLIENT_SECRET'] = config['Spotify API']['spotipy_client_secret']
 os.environ['SPOTIPY_REDIRECT_URI'] = config['Spotify API']['spotipy_callback_url']
 heard_songs = []
+track_total = 0
 
 
 def show_tracks(tracks, page=0):
@@ -51,9 +52,11 @@ def parse_tracks(tracks, page=0):
         artist = track['artists'][0]['name']
         name = track['name']
         track_id = track['id']
+        index = i + page + (page * 99)
         play_count = get_user_play_count_in_track_info(artist, name)
         if play_count > 0:
             heard_songs.append(track_id)
+        update_progress(int(index / track_total * 100))
         # print(name, '-', artist, '|', track_id, '|', play_count)
 
 def get_user_play_count_in_track_info(artist, title):
@@ -72,6 +75,9 @@ def split_seq(iterable, size):
     while item:
         yield item
         item = list(itertools.islice(it, size))
+
+def update_progress(progress):
+    sys.stdout.write('\r[{0}] {1}%'.format('#'*int(progress/10), progress))
 
 
 if __name__ == '__main__':
