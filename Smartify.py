@@ -1,11 +1,13 @@
 __author__ = 'WisdomWolf'
 from configparser import ConfigParser
-import sys
+import itertools
 import os
 import pdb
 import pylast
 import spotipy
 import spotipy.util as util
+import sys
+import time
 
 config = ConfigParser()
 config.read('settings.ini')
@@ -22,13 +24,14 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                password_hash=password_hash)
 
 # SpotiPy
-scope = 'user-library-read'
+scope = 'playlist-modify-public'
 os.environ['SPOTIPY_CLIENT_ID'] = config['Spotify API']['spotipy_client_id']
 os.environ['SPOTIPY_CLIENT_SECRET'] = config['Spotify API']['spotipy_client_secret']
 os.environ['SPOTIPY_REDIRECT_URI'] = config['Spotify API']['spotipy_callback_url']
+heard_songs = []
 
 
-def show_tracks(results, page=0):
+def show_tracks(tracks, page=0):
     for i, item in enumerate(tracks['items'], start=1):
         track = item['track']
         title = track['name']
@@ -42,6 +45,16 @@ def show_tracks(results, page=0):
         #     print(index)
         #     playcount_file.write(csv_info)
 
+def parse_tracks(tracks, page=0):
+    for i, item in enumerate(tracks['items'], start=1):
+        track = item['track']
+        artist = track['artists'][0]['name']
+        name = track['name']
+        track_id = track['id']
+        play_count = get_user_play_count_in_track_info(artist, name)
+        if play_count > 0:
+            heard_songs.append(track_id)
+        # print(name, '-', artist, '|', track_id, '|', play_count)
 
 def get_user_play_count_in_track_info(artist, title):
     # Arrange
@@ -52,6 +65,13 @@ def get_user_play_count_in_track_info(artist, title):
     # Act
     count = track.get_userplaycount()
     return count
+
+def split_seq(iterable, size):
+    it = iter(iterable)
+    item = list(itertools.islice(it, size))
+    while item:
+        yield item
+        item = list(itertools.islice(it, size))
 
 
 if __name__ == '__main__':
@@ -65,25 +85,60 @@ if __name__ == '__main__':
             print("Usage: %s username" % (sys.argv[0],))
             sys.exit()
 
+    username = username.lower()
     token = util.prompt_for_user_token(username, scope)
 
     if token:
         sp = spotipy.Spotify(auth=token)
         playlists = sp.user_playlists(username)
-        for playlist in playlists['items'][:2]:
-            if playlist['owner']['id'] == username:
-                print()
-                print(playlist['name'])
-                track_total = playlist['tracks']['total']
-                print('  total tracks', track_total)
-                results = sp.user_playlist(username, playlist['id'], fields="tracks,next")
-                tracks = results['tracks']
-                show_tracks(tracks)
-                page = 0
-                while tracks['next']:
-                    page += 1
-                    tracks = sp.next(tracks)
-                    show_tracks(tracks, page)
-                print('end of playlist:{0}'.format(playlist['name']))
+        playlist_id = '4pPONiqE0eE1XQXByCVWv0'
+        playlist = sp.user_playlist(username, playlist_id)
+        track_total = playlist['tracks']['total']
+        print('Are you sure you want to filter {0}({1})'.format(
+            playlist['name'], track_total))
+        choice = input('-> ')
+        if choice.casefold() == 'yes' or choice.casefold() == 'y':
+            print('Preparing to parse playlist...')
+        else:
+            print('Exiting...')
+            time.sleep(3)
+            sys.exit()
+
+        results = sp.user_playlist(username, playlist['id'], fields="tracks,next")
+        tracks = results['tracks']
+        parse_tracks(tracks)
+        page = 0
+        while tracks['next']:
+            page += 1
+            tracks = sp.next(tracks)
+            parse_tracks(tracks, page)
+
+        print('\nParsed {0} tracks.\nPreparing to remove {1} songs.'.format(
+            str(track_total), len(heard_songs)
+        ))
+
+        if heard_songs:
+            split_lists = list(split_seq(heard_songs, 99))
+            for l in split_lists:
+                sp.user_playlist_remove_all_occurrences_of_tracks(username,
+                                                                  playlist_id, l)
+
+        pdb.set_trace()
+
+        # for playlist in playlists['items']:
+        #     if playlist['owner']['id'] == username:
+        #         print()
+        #         print(playlist['name'], '-', playlist['id'])
+        #         track_total = playlist['tracks']['total']
+        #         print('  total tracks', track_total)
+                # results = sp.user_playlist(username, playlist['id'], fields="tracks,next")
+                # tracks = results['tracks']
+                # show_tracks(tracks)
+                # page = 0
+                # while tracks['next']:
+                #     page += 1
+                #     tracks = sp.next(tracks)
+                #     show_tracks(tracks, page)
+                # print('end of playlist:{0}'.format(playlist['name']))
     else:
         print("Can't get token for", username)
