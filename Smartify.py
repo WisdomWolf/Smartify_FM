@@ -1,5 +1,6 @@
 __author__ = 'WisdomWolf'
 from configparser import ConfigParser
+import datetime
 import itertools
 import os
 import pdb
@@ -66,8 +67,19 @@ def get_user_play_count_in_track_info(artist, title):
         network=network, username=lastfm_username)
 
     # Act
-    count = track.get_userplaycount()
+    try:
+        count = track.get_userplaycount()
+    except WSError:
+        print('Unable to locate {0} - {1}'.format(artist, title))
     return count
+
+def display_playlists(playlists):
+    for playlist in playlists['items']:
+        if playlist['owner']['id'] == username:
+            print()
+            print(playlist['name'], '-', playlist['id'])
+            track_total = playlist['tracks']['total']
+            print('  total tracks', track_total)
 
 def split_seq(iterable, size):
     it = iter(iterable)
@@ -96,14 +108,16 @@ if __name__ == '__main__':
 
     if token:
         sp = spotipy.Spotify(auth=token)
+        start_time = round(time.time())
         playlists = sp.user_playlists(username)
-        playlist_id = '4pPONiqE0eE1XQXByCVWv0'
+        playlist_id = '7N1WdCoTTSql2mN8OuaYfD'
         playlist = sp.user_playlist(username, playlist_id)
         track_total = playlist['tracks']['total']
         print('Are you sure you want to filter {0}({1})'.format(
             playlist['name'], track_total))
         choice = input('-> ')
         if choice.casefold() == 'yes' or choice.casefold() == 'y':
+            print(datetime.datetime.now())
             print('Preparing to parse playlist...')
         else:
             print('Exiting...')
@@ -128,15 +142,12 @@ if __name__ == '__main__':
             for l in split_lists:
                 sp.user_playlist_remove_all_occurrences_of_tracks(username,
                                                                   playlist_id, l)
+        end_time = round(time.time())
+        print('Completed. Duration: {0} Process Time: {1}'.format(
+            datetime.timedelta(seconds=(end_time - start_time)), time.process_time()))
 
         pdb.set_trace()
 
-        # for playlist in playlists['items']:
-        #     if playlist['owner']['id'] == username:
-        #         print()
-        #         print(playlist['name'], '-', playlist['id'])
-        #         track_total = playlist['tracks']['total']
-        #         print('  total tracks', track_total)
                 # results = sp.user_playlist(username, playlist['id'], fields="tracks,next")
                 # tracks = results['tracks']
                 # show_tracks(tracks)

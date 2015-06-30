@@ -3,8 +3,8 @@ from flask import Flask, redirect, url_for, session, request
 from flask_oauthlib.client import OAuth, OAuthException
 
 
-SPOTIFY_APP_ID = 'fdb9f1cec99b40d19894c9454642b5f6'
-SPOTIFY_APP_SECRET = 'b4a0cfb65b4a45a0aefbe72341e36be3'
+SPOTIFY_APP_ID = '3193cf23af3d42588b9bbf90dec4972e'
+SPOTIFY_APP_SECRET = '8b7d415777144a90b0c33df42925490a'
 
 
 app = Flask(__name__)
@@ -54,10 +54,11 @@ def spotify_authorized():
         return 'Access denied: {0}'.format(resp.message)
 
     session['oauth_token'] = (resp['access_token'], '')
-    me = spotify.get('/me')
+    me = spotify.get('https://api.spotify.com/v1/me')
     return 'Logged in as id={0} name={1} redirect={2}'.format(
         me.data['id'],
-        me.data['name'],
+        #me.data['name'],
+        'someone',
         request.args.get('next')
     )
 
