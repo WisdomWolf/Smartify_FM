@@ -57,8 +57,7 @@ def spotify_authorized():
     me = spotify.get('https://api.spotify.com/v1/me')
     return 'Logged in as id={0} name={1} redirect={2}'.format(
         me.data['id'],
-        #me.data['name'],
-        'someone',
+        me.data['display_name'],
         request.args.get('next')
     )
 
