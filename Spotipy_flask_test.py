@@ -1,6 +1,8 @@
 __author__ = 'WisdomWolf'
+import os
 from flask import Flask, redirect, url_for, session, request
 from flask_oauthlib.client import OAuth, OAuthException
+
 
 
 SPOTIFY_APP_ID = '3193cf23af3d42588b9bbf90dec4972e'
