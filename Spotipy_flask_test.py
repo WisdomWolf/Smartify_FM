@@ -68,4 +68,4 @@ def get_spotify_oauth_token():
 
 
 if __name__ == '__main__':
-    app.run(port=80)
+    app.run()
