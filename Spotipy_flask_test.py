@@ -8,7 +8,7 @@ SPOTIFY_APP_SECRET = '8b7d415777144a90b0c33df42925490a'
 
 
 app = Flask(__name__)
-app.debug = True
+app.debug = False
 app.secret_key = 'development'
 oauth = OAuth(app)
 
