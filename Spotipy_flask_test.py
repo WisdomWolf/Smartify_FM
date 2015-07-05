@@ -1,16 +1,41 @@
 __author__ = 'WisdomWolf'
 import os
-from flask import Flask, redirect, url_for, session, request
+from flask import (
+    Flask,
+    redirect,
+    url_for,
+    session,
+    request,
+    jsonify,
+    render_template
+)
 from flask_oauthlib.client import OAuth, OAuthException
+from configparser import ConfigParser
+import pylast
 
 
 
 SPOTIFY_APP_ID = '3193cf23af3d42588b9bbf90dec4972e'
 SPOTIFY_APP_SECRET = '8b7d415777144a90b0c33df42925490a'
 
+config = ConfigParser()
+config.read('settings.ini')
+
+# PyLast
+API_KEY = config['Last-FM API']['lastfm_api_key']
+API_SECRET = config['Last-FM API']['lastfm_api_secret']
+
+lastfm_username = config['LastFM']['Username']
+password_hash = config['LastFM']['Password Hash']
+
+network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
+                               username=lastfm_username,
+                               password_hash=password_hash)
+
+DEFAULT_ALBUM_ART = "http://upload.wikimedia.org/wikipedia/en/5/54/Public_image_ltd_album_cover.jpg"
 
 app = Flask(__name__)
-app.debug = False
+app.debug = True
 app.secret_key = 'development'
 oauth = OAuth(app)
 
@@ -33,6 +58,55 @@ spotify = oauth.remote_app(
 def index():
     return redirect(url_for('login'))
 
+@app.route('/now-playing')
+def now_playing():
+    user = pylast.User(lastfm_username, network)
+    return '{0} | {1}'.format(user.get_now_playing().artist, user.get_now_playing().title)
+
+@app.route('/currently-playing/')
+@app.route('/currently-playing/<username>')
+def currently_playing(username=None):
+    username = username or 'wisdomwolf'
+    playing = pylast.User(username, network).get_now_playing()
+    image = get_cover_art(playing)
+    print('{0} | {1}'.format(playing.artist, playing.title))
+    return render_template('currently-playing.html',
+        artist=playing.artist, track=playing.title, image=image)
+
+def get_cover_art(playing):
+    album = playing.get_album()
+    if not album:
+        print("Couldn't obtain album for {0} | {1}".format(
+            playing.artist, playing.title))
+        return DEFAULT_ALBUM_ART
+    else:
+        try:
+            print(album.get_cover_image())
+            return album.get_cover_image()
+        except AttributeError:
+            print('No cover art available, using default')
+            return DEFAULT_ALBUM_ART
+
+@app.route('/update_now_playing')
+def update_now_playing():
+    print('updating now playing info')
+    username = request.args.get('username', '', type=str)
+    playing = pylast.User(username, network).get_now_playing()
+    image = get_cover_art(playing)
+    return jsonify(track=playing.title,
+                   artist=playing.artist.get_name(),
+                   image=image)
+
+
+@app.route('/recent-tracks')
+def recent_tracks():
+    user = pylast.User(lastfm_username, network)
+    track_list = []
+    print('{0} tracks found.'.format(len(user.get_recent_tracks())))
+    for played_track in user.get_recent_tracks():
+        track_list.append('{0} | {1}'.format(played_track.track.artist, played_track.track.title))
+
+    return '<br/>'.join(track_list)
 
 @app.route('/login')
 def login():

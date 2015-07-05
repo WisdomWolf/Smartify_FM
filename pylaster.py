@@ -21,3 +21,13 @@ def test_user_play_count_in_track_info(self):
 
 	# Assert
 	self.assertGreaterEqual(count, 0)
+
+def get_current_album(user):
+	album = user.get_now_playing().get_album()
+	if not album:
+		print("Couldn't obtain album for {0} | {1}".format(
+			user.get_now_playing().artist, user.get_now_playing().title))
+	return album
+
+def get_cover_art(album):
+	return album.get_cover_image()
