@@ -17,19 +17,19 @@ config = ConfigParser()
 config.read('settings.ini')
 
 # PyLast
-API_KEY = config['Last-FM API']['lastfm_api_key']
-API_SECRET = config['Last-FM API']['lastfm_api_secret']
+LASTFM_API_KEY = os.environ['LASTFM_API_KEY']
+LASTFM_API_SECRET = os.environ['LASTFM_API_SECRET']
 
-lastfm_username = config['LastFM']['Username']
-password_hash = config['LastFM']['Password Hash']
+lastfm_username = os.environ['LASTFM_DEFAULT_USERNAME']
+password_hash = os.environ['LASTFM_DEFAULT_PWHASH']
 
-network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
+network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SECRET,
                                username=lastfm_username,
                                password_hash=password_hash)
 
 # Spotify
-SPOTIFY_APP_ID = config['Spotify API']['spotipy_client_id']
-SPOTIFY_APP_SECRET = config['Spotify API']['spotipy_client_secret']
+SPOTIFY_APP_ID = os.environ['SPOTIPY_CLIENT_ID']
+SPOTIFY_APP_SECRET = os.environ['SPOTIPY_CLIENT_SECRET']
 
 DEFAULT_ALBUM_ART = "http://upload.wikimedia.org/wikipedia/en/5/54/Public_image_ltd_album_cover.jpg"
 
