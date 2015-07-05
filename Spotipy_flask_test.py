@@ -76,20 +76,15 @@ def currently_playing(username=None):
 def get_cover_art(playing):
     album = playing.get_album()
     if not album:
-        print("Couldn't obtain album for {0} | {1}".format(
-            playing.artist, playing.title))
         return DEFAULT_ALBUM_ART
     else:
         try:
-            print(album.get_cover_image())
             return album.get_cover_image()
         except AttributeError:
-            print('No cover art available, using default')
             return DEFAULT_ALBUM_ART
 
 @app.route('/update_now_playing')
 def update_now_playing():
-    print('updating now playing info')
     username = request.args.get('username', '', type=str)
     playing = pylast.User(username, network).get_now_playing()
     image = get_cover_art(playing)
