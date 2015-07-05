@@ -73,24 +73,30 @@ def currently_playing(username=None):
         artist=playing.artist, track=playing.title, image=image)
 
 def get_cover_art(playing):
-    album = playing.get_album()
-    if not album:
-        return DEFAULT_ALBUM_ART
-    else:
-        try:
-            return album.get_cover_image()
-        except AttributeError:
+    try:
+        album = playing.get_album()
+        if not album:
             return DEFAULT_ALBUM_ART
+        else:
+            return album.get_cover_image()
+    except AttributeError:
+        return DEFAULT_ALBUM_ART
 
 @app.route('/update_now_playing')
 def update_now_playing():
     username = request.args.get('username', '', type=str)
-    playing = pylast.User(username, network).get_now_playing()
-    image = get_cover_art(playing)
-    return jsonify(track=playing.title,
-                   artist=playing.artist.get_name(),
-                   image=image,
-                   track_url=playing.get_url())
+    try:
+        playing = pylast.User(username, network).get_now_playing()
+        image = get_cover_art(playing)
+        return jsonify(track=playing.title,
+                       artist=playing.artist.get_name(),
+                       image=image,
+                       track_url=playing.get_url())
+    except AttributeError:
+        return jsonify(track='track',
+                       artist='artist',
+                       image=DEFAULT_ALBUM_ART,
+                       track_url='#')
 
 
 @app.route('/recent-tracks')
