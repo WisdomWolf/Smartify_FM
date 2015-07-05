@@ -13,11 +13,6 @@ from flask_oauthlib.client import OAuth, OAuthException
 from configparser import ConfigParser
 import pylast
 
-
-
-SPOTIFY_APP_ID = '3193cf23af3d42588b9bbf90dec4972e'
-SPOTIFY_APP_SECRET = '8b7d415777144a90b0c33df42925490a'
-
 config = ConfigParser()
 config.read('settings.ini')
 
@@ -31,6 +26,10 @@ password_hash = config['LastFM']['Password Hash']
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=lastfm_username,
                                password_hash=password_hash)
+
+# Spotify
+SPOTIFY_APP_ID = config['Spotify API']['spotipy_client_id']
+SPOTIFY_APP_SECRET = config['Spotify API']['spotipy_client_secret']
 
 DEFAULT_ALBUM_ART = "http://upload.wikimedia.org/wikipedia/en/5/54/Public_image_ltd_album_cover.jpg"
 
@@ -90,7 +89,8 @@ def update_now_playing():
     image = get_cover_art(playing)
     return jsonify(track=playing.title,
                    artist=playing.artist.get_name(),
-                   image=image)
+                   image=image,
+                   track_url=playing.get_url())
 
 
 @app.route('/recent-tracks')

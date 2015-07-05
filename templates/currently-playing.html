@@ -31,9 +31,10 @@
             $.getJSON($SCRIPT_ROOT + '/update_now_playing', {
                 username: username
             }, function(data) {
-                document.getElementById("img").src=(data.image),
+                $("#img").attr('src', data.image),
                 $("#artist").text(data.artist),
-                $("#track").text(data.track);
+                $("#track").text(data.track),
+                $("#track").attr('href', data.track_url);
             });
 		};
 
