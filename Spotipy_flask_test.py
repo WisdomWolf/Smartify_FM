@@ -68,7 +68,7 @@ def currently_playing(username=None):
     username = username or 'wisdomwolf'
     playing = pylast.User(username, network).get_now_playing()
     image = get_cover_art(playing)
-    print('{0} | {1}'.format(playing.artist, playing.title))
+    # print('{0} | {1}'.format(playing.artist, playing.title))
     return render_template('currently-playing.html',
         artist=playing.artist, track=playing.title, image=image)
 
