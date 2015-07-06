@@ -30,6 +30,7 @@ LASTFM_API_SECRET = os.environ['LASTFM_API_SECRET']
 lastfm_username = os.environ['LASTFM_DEFAULT_USERNAME']
 password_hash = os.environ['LASTFM_DEFAULT_PWHASH']
 spotify_username = os.environ['SPOTIFY_DEFAULT_USERNAME']
+sp = None
 
 network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SECRET,
                                username=lastfm_username,
@@ -143,6 +144,7 @@ def login():
 
 @app.route('/login/authorized')
 def spotify_authorized():
+    global sp
     resp = spotify.authorized_response()
     if resp is None:
         return 'Access denied: reason={0} error={1}'.format(
@@ -167,10 +169,54 @@ def spotify_authorized():
 def display_playlists(playlists):
     result = []
     for playlist in playlists['items']:
-        result.append('{0} - {1}\n total tracks: {2}'.format(
-            playlist['name'], playlist['id'],playlist['tracks']['total']))
+        result.append('<a href={3}>{0} | {1} | total tracks: {2}</a>'.format(
+            playlist['name'], playlist['id'], playlist['tracks']['total'],
+            url_for('display_tracks', playlist_id=playlist['id'])))
 
     return '<br/>'.join(result)
+
+@app.route('/list_tracks/<playlist_id>')
+def display_tracks(playlist_id):
+    global sp
+    results = []
+    playlist = sp.user_playlist(spotify_username, playlist_id)
+    tracks = playlist['tracks']
+    results += parse_tracks(tracks)
+    page = 0
+    while tracks['next']:
+        page += 1
+        tracks = sp.next(tracks)
+        results += parse_tracks(tracks, page)
+
+    return '<br/>'.join(results)
+
+def parse_tracks(tracks, page=0):
+    results = []
+    for i, item in enumerate(tracks['items'], start=1):
+        track = item['track']
+        artist = track['artists'][0]['name']
+        title = track['name']
+        index = i + page + (page * 99)
+        play_count = get_user_play_count_in_track_info(artist, title)
+        info = '{0}. {1}/{2} | {3}'.format(
+            index, artist, title, play_count)
+        results.append(info)
+
+    return results
+        # print(name, '-', artist, '|', track_id, '|', play_count)
+
+def get_user_play_count_in_track_info(artist, title):
+    # Arrange
+    track = pylast.Track(
+        artist=artist, title=title,
+        network=network, username=lastfm_username)
+
+    # Act
+    try:
+        count = track.get_userplaycount()
+    except WSError:
+        print('Unable to locate {0} - {1}'.format(artist, title))
+    return count
 
 @spotify.tokengetter
 def get_spotify_oauth_token():
