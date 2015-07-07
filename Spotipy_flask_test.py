@@ -144,7 +144,7 @@ def login():
 
 @app.route('/login/authorized')
 def spotify_authorized():
-    global sp
+    global sp, spotify_username
     resp = spotify.authorized_response()
     if resp is None:
         return 'Access denied: reason={0} error={1}'.format(
@@ -156,9 +156,10 @@ def spotify_authorized():
 
     session['oauth_token'] = (resp['access_token'], '')
     token = session['oauth_token'][0]
+    me = spotify.get('https://api.spotify.com/v1/me')
+    spotify_username = me.data['id']
     sp = spotipy.Spotify(auth=token)
     playlists = sp.user_playlists(spotify_username)
-    me = spotify.get('https://api.spotify.com/v1/me')
     return display_playlists(playlists)
     # return 'Logged in as id={0} name={1} redirect={2}'.format(
     #     me.data['id'],
@@ -169,8 +170,8 @@ def spotify_authorized():
 def display_playlists(playlists):
     result = []
     for playlist in playlists['items']:
-        result.append('<a href={3}>{0} | {1} | total tracks: {2}</a>'.format(
-            playlist['name'], playlist['id'], playlist['tracks']['total'],
+        result.append('<a href={2}>{0} | total tracks: {1}</a>'.format(
+            playlist['name'], playlist['tracks']['total'],
             url_for('display_tracks', playlist_id=playlist['id'])))
 
     return '<br/>'.join(result)
@@ -197,7 +198,8 @@ def parse_tracks(tracks, page=0):
         artist = track['artists'][0]['name']
         title = track['name']
         index = i + page + (page * 99)
-        play_count = get_user_play_count_in_track_info(artist, title)
+        # play_count = get_user_play_count_in_track_info(artist, title)
+        play_count = 0
         info = '{0}. {1}/{2} | {3}'.format(
             index, artist, title, play_count)
         results.append(info)
