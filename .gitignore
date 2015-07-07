@@ -61,6 +61,9 @@ target/
 .idea/
 .cache-wisdomwolf
 
+# Virtual Env
+venv/
+
 # Config Files
 **.ini
 
