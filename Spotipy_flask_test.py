@@ -10,9 +10,12 @@ from flask import (
     render_template
 )
 from flask_oauthlib.client import OAuth, OAuthException
+from flask.ext.bootstrap import Bootstrap
 from configparser import ConfigParser
 import pylast
 import spotipy
+import sched
+import time
 import pdb
 
 if os.path.exists('settings.ini'):
@@ -46,6 +49,9 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = 'development'
 oauth = OAuth(app)
+bootstrap = Bootstrap(app)
+s = sched.scheduler(time.time, time.sleep)
+playlist_is_initialized = False
 
 spotify = oauth.remote_app(
     'spotify',
@@ -84,7 +90,7 @@ def currently_playing(username=None):
     except AttributeError:
         print('Nothing playing')
         return render_template('currently-playing.html',
-                               artist='artist', track='title', image=DEFAULT_ALBUM_ART)
+                               artist='nothing', track='playing', image=DEFAULT_ALBUM_ART)
 
 def get_cover_art(playing):
     try:
@@ -98,8 +104,10 @@ def get_cover_art(playing):
                 return track[0]['album']['images'][0]['url']
             else:
                 return DEFAULT_ALBUM_ART
-        else:
+        elif album.get_cover_image():
             return album.get_cover_image()
+        else:
+            return DEFAULT_ALBUM_ART
     except AttributeError:
         return DEFAULT_ALBUM_ART
 
@@ -116,8 +124,8 @@ def update_now_playing():
                        track_url=playing.get_url())
     except AttributeError:
         print('No data to update')
-        return jsonify(track='track',
-                       artist='artist',
+        return jsonify(track='playing',
+                       artist='nothing',
                        image=DEFAULT_ALBUM_ART,
                        track_url='#')
 
@@ -126,8 +134,8 @@ def update_now_playing():
 def recent_tracks():
     user = pylast.User(lastfm_username, network)
     track_list = []
-    print('{0} tracks found.'.format(len(user.get_recent_tracks())))
-    for played_track in user.get_recent_tracks():
+    print('{0} tracks found.'.format(len(user.get_recent_tracks(limit=2))))
+    for played_track in user.get_recent_tracks(limit=2):
         track_list.append('{0} | {1}'.format(played_track.track.artist, played_track.track.title))
 
     return '<br/>'.join(track_list)
@@ -169,12 +177,15 @@ def spotify_authorized():
 
 def display_playlists(playlists):
     result = []
+    result_link = []
+    track_toals = []
     for playlist in playlists['items']:
-        result.append('<a href={2}>{0} | total tracks: {1}</a>'.format(
-            playlist['name'], playlist['tracks']['total'],
-            url_for('display_tracks', playlist_id=playlist['id'])))
+        result.append(playlist['name'])
+        track_toals.append(playlist['tracks']['total'])
+        result_link.append(url_for('display_tracks', playlist_id=playlist['id']))
 
-    return '<br/>'.join(result)
+    return render_template('display_playlists.html',
+                           playlists=zip(result, track_toals, result_link))
 
 @app.route('/list_tracks/<playlist_id>')
 def display_tracks(playlist_id):
@@ -188,21 +199,31 @@ def display_tracks(playlist_id):
         page += 1
         tracks = sp.next(tracks)
         results += parse_tracks(tracks, page)
+    pdb.set_trace()
+    return '<br/>'.join(format_track_list(results))
 
-    return '<br/>'.join(results)
+def format_track_list(track_list):
+    results = []
+    for index, artist, title, play_count, _ in track_list:
+        info = '{0}. {1}/{2} | {3}'.format(index,
+                                           artist, title,
+                                           play_count)
+        results.append(info)
+        return results
 
 def parse_tracks(tracks, page=0):
     results = []
     for i, item in enumerate(tracks['items'], start=1):
         track = item['track']
+        track['artist'] = track['artists'][0]
         artist = track['artists'][0]['name']
         title = track['name']
+        track_id = track['id']
         index = i + page + (page * 99)
         # play_count = get_user_play_count_in_track_info(artist, title)
         play_count = 0
-        info = '{0}. {1}/{2} | {3}'.format(
-            index, artist, title, play_count)
-        results.append(info)
+        # info = zip(index, artist, title, play_count, track_id)
+        results.append(track)
 
     return results
         # print(name, '-', artist, '|', track_id, '|', play_count)
@@ -223,6 +244,24 @@ def get_user_play_count_in_track_info(artist, title):
 @spotify.tokengetter
 def get_spotify_oauth_token():
     return session.get('oauth_token')
+
+def remove_recent_from_playlist(playlist_id, playlist):
+    pass
+
+def initialize_playlist(playlist_id):
+    global sp
+    results = []
+    playlist = sp.user_playlist(spotify_username, playlist_id)
+    tracks = playlist['tracks']
+    results += parse_tracks(tracks)
+    page = 0
+    while tracks['next']:
+        page += 1
+        tracks = sp.next(tracks)
+        results += parse_tracks(tracks, page)
+
+    return results
+
 
 
 if __name__ == '__main__':

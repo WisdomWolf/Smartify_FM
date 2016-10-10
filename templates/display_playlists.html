@@ -1,0 +1,9 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Playlists{% endblock %}
+    {% block content %}
+    <ul>
+        {% for item, count, link in playlists %}
+            <li><a href={{ link }}>{{ item }}</a> | total tracks: {{ count }}</li>
+        {% endfor %}
+    </ul>
+    {% endblock %}
