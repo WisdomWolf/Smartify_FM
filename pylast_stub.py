@@ -21,6 +21,6 @@ def get_all_tracks(user):
     for i in range(chunks):
         print('Getting chunk {} of {}'.format(i + 1, chunks))
         recent_tracks = user.get_recent_tracks(limit=1000, time_to=last_timestamp)
-        tracks.union(recent_tracks)
+        tracks = tracks.union(recent_tracks)
         last_timestamp = int(recent_tracks[-1].timestamp)
     return sorted(list(tracks), key=lambda x: x.timestamp, reverse=True)
