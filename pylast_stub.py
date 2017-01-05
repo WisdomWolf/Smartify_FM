@@ -24,3 +24,12 @@ def get_all_tracks(user):
         tracks = tracks.union(recent_tracks)
         last_timestamp = int(recent_tracks[-1].timestamp)
     return sorted(list(tracks), key=lambda x: x.timestamp, reverse=True)
+
+def create_library_set(track_history, user):
+    library_set = set()
+    for entry in track_history:
+        library_set.add(entry.track)
+    for track in library_set:
+        track.username = user.name
+    return library_set
+    
