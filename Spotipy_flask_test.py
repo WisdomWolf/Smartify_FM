@@ -10,7 +10,6 @@ from flask import (
     render_template
 )
 from flask_oauthlib.client import OAuth, OAuthException
-from flask.ext.bootstrap import Bootstrap
 from configparser import ConfigParser
 import pylast
 import spotipy
@@ -49,7 +48,6 @@ app = Flask(__name__)
 app.debug = True
 app.secret_key = 'development'
 oauth = OAuth(app)
-bootstrap = Bootstrap(app)
 s = sched.scheduler(time.time, time.sleep)
 playlist_is_initialized = False
 
