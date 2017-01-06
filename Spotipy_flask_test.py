@@ -10,7 +10,7 @@ from flask import (
     render_template
 )
 from flask_oauthlib.client import OAuth, OAuthException
-from flask.ext.bootstrap import Bootstrap
+#from flask.ext.bootstrap import Bootstrap
 from configparser import ConfigParser
 import pylast
 import spotipy
