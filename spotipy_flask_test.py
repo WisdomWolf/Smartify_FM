@@ -209,13 +209,13 @@ def format_track_list(track_list):
                                            track['artist'], track['name'],
                                            track['play_count'])
         results.append(info)
-        return results
+    return results
 
 def parse_tracks(tracks, page=0):
     results = []
     for i, item in enumerate(tracks['items'], start=1):
         track = item['track']
-        track['artist'] = track['artists'][0]
+        track['artist'] = track['artists'][0]['name']
         artist = track['artists'][0]['name']
         title = track['name']
         track_id = track['id']
