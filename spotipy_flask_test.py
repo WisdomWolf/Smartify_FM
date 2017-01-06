@@ -222,6 +222,7 @@ def parse_tracks(tracks, page=0):
         index = i + page + (page * 99)
         # play_count = get_user_play_count_in_track_info(artist, title)
         play_count = 0
+        track['play_count'] = play_count
         # info = zip(index, artist, title, play_count, track_id)
         results.append(track)
 
