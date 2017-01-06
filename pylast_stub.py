@@ -5,6 +5,8 @@ import pylast
 import pickle
 from pprint import pprint
 from threading import Thread
+import time
+import concurrent.futures
 
 def get_track_playcount(track):
     try:
@@ -78,3 +80,6 @@ def create_library_set(track_history, user):
 
 with open('wisdomwolf_tracks.p', 'rb') as f:
     wisdomwolf_tracks = pickle.load(f)
+
+wisdomwolf_library = create_library_set(wisdomwolf_tracks, user)
+print('To get playcounts run: get_playcounts_threaded(wisdomwolf_library, 16/32/64)')
