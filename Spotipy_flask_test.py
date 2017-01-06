@@ -204,10 +204,10 @@ def display_tracks(playlist_id):
 
 def format_track_list(track_list):
     results = []
-    for index, artist, title, play_count, _ in track_list:
+    for index, track in enumerate(track_list, start=1):
         info = '{0}. {1}/{2} | {3}'.format(index,
-                                           artist, title,
-                                           play_count)
+                                           track['artist'], track['title'],
+                                           track['play_count'])
         results.append(info)
         return results
 
