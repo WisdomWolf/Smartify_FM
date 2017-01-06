@@ -206,7 +206,7 @@ def format_track_list(track_list):
     results = []
     for index, track in enumerate(track_list, start=1):
         info = '{0}. {1}/{2} | {3}'.format(index,
-                                           track['artist'], track['title'],
+                                           track['artist'], track['name'],
                                            track['play_count'])
         results.append(info)
         return results
