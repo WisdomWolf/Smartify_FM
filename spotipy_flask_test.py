@@ -209,7 +209,7 @@ def format_track_list(track_list):
                                            track['artist'], track['name'],
                                            track['play_count'])
         results.append(info)
-        return results
+    return results
 
 def parse_tracks(tracks, page=0):
     results = []
