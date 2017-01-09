@@ -58,11 +58,11 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
 user = pylast.User(lastfm_username, network)
 
 
-def get_all_tracks(user):
+def get_all_tracks(user, chunk_size=1000):
     playcount = user.get_playcount()
     tracks = set()
     last_timestamp = 0
-    chunks = playcount // 1000 + 1
+    chunks = playcount // chunk_size + 1
     for i in range(chunks):
         print('Getting chunk {} of {}'.format(i + 1, chunks))
         recent_tracks = user.get_recent_tracks(limit=1000, time_to=last_timestamp)
