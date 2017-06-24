@@ -69,3 +69,7 @@ venv/
 # Config Files
 **.ini
 
+# Misc
+**.xlsx
+**.pkl
+_
