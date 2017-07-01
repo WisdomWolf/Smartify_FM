@@ -18,21 +18,46 @@ import sched
 import time
 import pdb
 
-if os.path.exists('settings.ini'):
-    config = ConfigParser()
-    config.read('settings.ini')
+# if os.path.exists('settings.ini'):
+#     config = ConfigParser()
+#     config.read('settings.ini')
 
-    env = config['Environment Vars']
-    for k, v in env.items():
-        os.environ[k] = v
+#     env = config['Environment Vars']
+#     for k, v in env.items():
+#         os.environ[k] = v
+
+
+# Ini
+config = ConfigParser()
+config.read('settings.ini')
+env_vars = config['Environment Vars']
+
+SCOPES = [
+ 'playlist-read-private',
+ 'playlist-read-collaborative',
+ 'playlist-modify-public',
+ 'playlist-modify-private',
+ 'streaming',
+ 'ugc-image-upload',
+ 'user-follow-modify',
+ 'user-follow-read',
+ 'user-library-read',
+ 'user-library-modify',
+ 'user-read-private',
+ 'user-read-birthdate',
+ 'user-read-email',
+ 'user-top-read',
+ 'user-read-playback-state',
+ 'user-modify-playback-state',
+ 'user-read-currently-playing',
+ 'user-read-recently-played']
 
 # PyLast
-LASTFM_API_KEY = os.environ['LASTFM_API_KEY']
-LASTFM_API_SECRET = os.environ['LASTFM_API_SECRET']
-
-lastfm_username = os.environ['LASTFM_DEFAULT_USERNAME']
-password_hash = os.environ['LASTFM_DEFAULT_PWHASH']
-spotify_username = os.environ['SPOTIFY_DEFAULT_USERNAME']
+LASTFM_API_KEY = os.getenv('LASTFM_API_KEY') or env_vars['lastfm_api_key']
+LASTFM_API_SECRET = os.getenv('LASTFM_API_SECRET') or env_vars['lastfm_api_secret']
+lastfm_username = os.getenv('LASTFM_DEFAULT_USERNAME') or env_vars['lastfm_default_username']
+password_hash = os.getenv('LASTFM_DEFAULT_PWHASH') or env_vars['lastfm_default_pwhash']
+spotify_username = os.getenv('SPOTIFY_DEFAULT_USERNAME') or env_vars['spotify_default_username']
 sp = None
 
 network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SECRET,
@@ -40,8 +65,8 @@ network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SEC
                                password_hash=password_hash)
 
 # Spotify
-SPOTIFY_APP_ID = os.environ['SPOTIPY_CLIENT_ID']
-SPOTIFY_APP_SECRET = os.environ['SPOTIPY_CLIENT_SECRET']
+SPOTIFY_APP_ID = os.getenv('SPOTIPY_CLIENT_ID') or env_vars['spotipy_client_id']
+SPOTIFY_APP_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET') or env_vars['spotipy_client_secret']
 
 DEFAULT_ALBUM_ART = "http://upload.wikimedia.org/wikipedia/en/5/54/Public_image_ltd_album_cover.jpg"
 
@@ -60,7 +85,8 @@ spotify = oauth.remote_app(
     # Change the scope to match whatever it us you need
     # list of scopes can be found in the url below
     # https://developer.spotify.com/web-api/using-scopes/
-    request_token_params={'scope': 'playlist-modify-public'},
+    # request_token_params={'scope': 'playlist-modify-public user-read-playback-state'},
+    request_token_params={'scope': ' '.join(SCOPES)},
     base_url='https://accounts.spotify.com',
     request_token_url=None,
     access_token_url='/api/token',
@@ -167,6 +193,9 @@ def spotify_authorized():
     me = spotify.get('https://api.spotify.com/v1/me')
     spotify_username = me.data['id']
     sp = spotipy.Spotify(auth=token)
+    with open('{}_token.dat'.format(spotify_username), 'w') as f:
+        f.write(token)
+    print('Token stored')
     playlists = sp.user_playlists(spotify_username)
     return display_playlists(playlists)
     # return 'Logged in as id={0} name={1} redirect={2}'.format(

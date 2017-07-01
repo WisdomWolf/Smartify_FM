@@ -1,0 +1,218 @@
+{
+    "timestamp": 1507653178531,
+    "progress_ms": 78181,
+    "is_playing": true,
+    "item": {
+        "album": {
+            "album_type": "album",
+            "artists": [
+                {
+                    "external_urls": {
+                        "spotify": "https://open.spotify.com/artist/2MYN7OKnlCiZ0wrwp2A1ox"
+                    },
+                    "href": "https://api.spotify.com/v1/artists/2MYN7OKnlCiZ0wrwp2A1ox",
+                    "id": "2MYN7OKnlCiZ0wrwp2A1ox",
+                    "name": "Hybrid",
+                    "type": "artist",
+                    "uri": "spotify:artist:2MYN7OKnlCiZ0wrwp2A1ox"
+                }
+            ],
+            "available_markets": [
+                "AD",
+                "AR",
+                "AT",
+                "AU",
+                "BE",
+                "BG",
+                "BO",
+                "BR",
+                "CA",
+                "CH",
+                "CL",
+                "CO",
+                "CR",
+                "CY",
+                "CZ",
+                "DE",
+                "DK",
+                "DO",
+                "EC",
+                "EE",
+                "ES",
+                "FI",
+                "FR",
+                "GB",
+                "GR",
+                "GT",
+                "HK",
+                "HN",
+                "HU",
+                "ID",
+                "IE",
+                "IS",
+                "IT",
+                "JP",
+                "LI",
+                "LT",
+                "LU",
+                "LV",
+                "MC",
+                "MT",
+                "MX",
+                "MY",
+                "NI",
+                "NL",
+                "NO",
+                "NZ",
+                "PA",
+                "PE",
+                "PH",
+                "PL",
+                "PT",
+                "PY",
+                "SE",
+                "SG",
+                "SK",
+                "SV",
+                "TR",
+                "TW",
+                "US",
+                "UY"
+            ],
+            "external_urls": {
+                "spotify": "https://open.spotify.com/album/2M5wDvnxlSzT0uSrR8QKTe"
+            },
+            "href": "https://api.spotify.com/v1/albums/2M5wDvnxlSzT0uSrR8QKTe",
+            "id": "2M5wDvnxlSzT0uSrR8QKTe",
+            "images": [
+                {
+                    "height": 640,
+                    "url": "https://i.scdn.co/image/a52961c26a2c9dd3adebaf590014af994c99c8be",
+                    "width": 640
+                },
+                {
+                    "height": 300,
+                    "url": "https://i.scdn.co/image/887311932d18339fdc0e9b0e5272632cd4b4bee1",
+                    "width": 300
+                },
+                {
+                    "height": 64,
+                    "url": "https://i.scdn.co/image/1b13fe6b86f2360b7d6ed5e89eb0526526f71951",
+                    "width": 64
+                }
+            ],
+            "name": "Driveclub Original Game Soundtrack (Remixes)",
+            "type": "album",
+            "uri": "spotify:album:2M5wDvnxlSzT0uSrR8QKTe"
+        },
+        "artists": [
+            {
+                "external_urls": {
+                    "spotify": "https://open.spotify.com/artist/2MYN7OKnlCiZ0wrwp2A1ox"
+                },
+                "href": "https://api.spotify.com/v1/artists/2MYN7OKnlCiZ0wrwp2A1ox",
+                "id": "2MYN7OKnlCiZ0wrwp2A1ox",
+                "name": "Hybrid",
+                "type": "artist",
+                "uri": "spotify:artist:2MYN7OKnlCiZ0wrwp2A1ox"
+            },
+            {
+                "external_urls": {
+                    "spotify": "https://open.spotify.com/artist/3UCbp6D1lvILlxRJT9LnFa"
+                },
+                "href": "https://api.spotify.com/v1/artists/3UCbp6D1lvILlxRJT9LnFa",
+                "id": "3UCbp6D1lvILlxRJT9LnFa",
+                "name": "Koven",
+                "type": "artist",
+                "uri": "spotify:artist:3UCbp6D1lvILlxRJT9LnFa"
+            }
+        ],
+        "available_markets": [
+            "AD",
+            "AR",
+            "AT",
+            "AU",
+            "BE",
+            "BG",
+            "BO",
+            "BR",
+            "CA",
+            "CH",
+            "CL",
+            "CO",
+            "CR",
+            "CY",
+            "CZ",
+            "DE",
+            "DK",
+            "DO",
+            "EC",
+            "EE",
+            "ES",
+            "FI",
+            "FR",
+            "GB",
+            "GR",
+            "GT",
+            "HK",
+            "HN",
+            "HU",
+            "ID",
+            "IE",
+            "IS",
+            "IT",
+            "JP",
+            "LI",
+            "LT",
+            "LU",
+            "LV",
+            "MC",
+            "MT",
+            "MX",
+            "MY",
+            "NI",
+            "NL",
+            "NO",
+            "NZ",
+            "PA",
+            "PE",
+            "PH",
+            "PL",
+            "PT",
+            "PY",
+            "SE",
+            "SG",
+            "SK",
+            "SV",
+            "TR",
+            "TW",
+            "US",
+            "UY"
+        ],
+        "disc_number": 1,
+        "duration_ms": 223521,
+        "explicit": false,
+        "external_ids": {
+            "isrc": "USGSS1500241"
+        },
+        "external_urls": {
+            "spotify": "https://open.spotify.com/track/3Nlzx1RXT2FdMnqORCzGm1"
+        },
+        "href": "https://api.spotify.com/v1/tracks/3Nlzx1RXT2FdMnqORCzGm1",
+        "id": "3Nlzx1RXT2FdMnqORCzGm1",
+        "name": "Be Here Now - Koven Remix",
+        "popularity": 34,
+        "preview_url": "https://p.scdn.co/mp3-preview/efcc417aa66a6dc61b5a270a89a41394e99a4c26?cid=fdb9f1cec99b40d19894c9454642b5f6",
+        "track_number": 24,
+        "type": "track",
+        "uri": "spotify:track:3Nlzx1RXT2FdMnqORCzGm1"
+    },
+    "context": {
+        "external_urls": {
+            "spotify": "http://open.spotify.com/user/spotify/playlist/37i9dQZEVXcGPnpu8RFtIW"
+        },
+        "href": "https://api.spotify.com/v1/users/spotify/playlists/37i9dQZEVXcGPnpu8RFtIW",
+        "type": "playlist",
+        "uri": "spotify:user:spotify:playlist:37i9dQZEVXcGPnpu8RFtIW"
+    }
+}

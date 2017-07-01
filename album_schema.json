@@ -1,0 +1,27 @@
+{
+  "album_type":,
+    "artists": [
+      {
+        "external_urls": {},
+        "href":,
+        "id":,
+        "name":,
+        "type":,
+        "uri":
+      }
+    ],
+    "available_markets": [],
+    "external_urls": {},
+    "href":,
+    "id":,
+    "images": [
+      {
+        "height":,
+        "url":,
+        "width":
+      }
+    ],
+    "name":,
+    "type":,
+    "uri"
+}

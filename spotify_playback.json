@@ -1,0 +1,29 @@
+{
+  "timestamp":,
+  "progress_ms":,
+  "is_playing":,
+  "item": {
+    "album": {"<album_schema>"},
+    "artists": [{"<artist_schema>"}],
+    "available_markets":[],
+    "disc_number":,
+    "duration_ms":,
+    "explicit":,
+    "external_ids": {},
+    "external_urls": {},
+    "href":,
+    "id":,
+    "name":,
+    "popularity":,
+    "preview_url":,
+    "track_number":,
+    "type":,
+    "uri":
+  },
+    "context": {
+      "external_urls": {},
+      "href":,
+      "type":,
+      "uri":
+    }
+}
