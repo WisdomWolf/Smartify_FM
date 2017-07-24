@@ -7,6 +7,7 @@ from pprint import pprint
 from threading import Thread
 import time
 import concurrent.futures
+import configparser
 
 def get_track_playcount(track):
     try:
@@ -46,11 +47,16 @@ def get_playcounts_concurrent(track_list):
     return user_playcount_dict
 
 
+# Ini
+config = configparser.ConfigParser()
+config.read('settings.ini')
+env_vars = config['Environment Vars']
+
 # PyLast
-API_KEY = os.environ['LASTFM_API_KEY']
-API_SECRET = os.environ['LASTFM_API_SECRET']
-lastfm_username = os.environ['LASTFM_DEFAULT_USERNAME']
-password_hash = os.environ['LASTFM_DEFAULT_PWHASH']
+API_KEY = os.getenv('LASTFM_API_KEY') or env_vars['lastfm_api_key']
+API_SECRET = os.getenv('LASTFM_API_SECRET') or env_vars['lastfm_api_secret']
+lastfm_username = os.getenv('LASTFM_DEFAULT_USERNAME') or env_vars['lastfm_default_username']
+password_hash = os.getenv('LASTFM_DEFAULT_PWHASH') or env_vars['lastfm_default_pwhash']
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
                                username=lastfm_username,
                                password_hash=password_hash)
@@ -78,8 +84,10 @@ def create_library_set(track_history, user):
         track.username = user.name
     return library_set
 
-with open('wisdomwolf_tracks.p', 'rb') as f:
-    wisdomwolf_tracks = pickle.load(f)
+if __name__ == "__main__":
 
-wisdomwolf_library = create_library_set(wisdomwolf_tracks, user)
-print('To get playcounts run: get_playcounts_threaded(wisdomwolf_library, 16/32/64)')
+    with open('wisdomwolf_tracks.p', 'rb') as f:
+        wisdomwolf_tracks = pickle.load(f)
+
+    wisdomwolf_library = create_library_set(wisdomwolf_tracks, user)
+    print('To get playcounts run: get_playcounts_threaded(wisdomwolf_library, 16/32/64)')
