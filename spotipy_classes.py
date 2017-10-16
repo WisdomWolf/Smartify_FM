@@ -1,3 +1,5 @@
+from datetime import date
+
 class _SpotipyBase(object):
 
     def __init__(self, href=None, type=None, uri=None):
@@ -163,22 +165,25 @@ class Scrobbler(object):
 
     def update_track(self, track=None):
         track = track or SpotipyPlayback(**self.spotify.currently_playing())
-        if track and not lastfm_user.get_now_playing():
-            print('updating lastfm now playing')
-            self.lastfm_network.update_now_playing(track.track.artist, track.track.name,
-                        track.track.album, track.track.album.artist, track.track.duration_ms //1000)
-        if self.current_track != track:
-            self.previous_track = self.current_track
-            self.current_track = track
-            self.scrobble_check()
+        if track and track.is_playing:
+            if not lastfm_user.get_now_playing():
+                print('updating lastfm now playing')
+                self.lastfm_network.update_now_playing(track.track.artist, track.track.name,
+                        track.track.album, track.track.album.artist, track.track.duration)
+            if self.current_track != track:
+                self.previous_track = self.current_track
+                self.current_track = track
+                self.scrobble_check()
+        else:
+            print('nothing currently playing')
 
     def scrobble_check(self):
         previous_track = self.previous_track.track
         if self.lastfm_user.get_recent_tracks(limit=1)[0].track.get_name != previous_track.track.name:
             print('should scrobble {}'.format(previous_track.title))
             lastfm_network.scrobble(artist=previous_track.artist, title=previous_track.name,
-                timestamp=self.previous_track.timestamp // 1000, album=previous_track.album.name,
-                album_artist=previous_track.album.artist, duration=previous_track.duration_ms // 1000)
+                timestamp=self.previous_track.epoch_timestamp, album=previous_track.album.name,
+                album_artist=previous_track.album.artist, duration=previous_track.duration)
 
 
 def create_lastfm_tuple(spotify_now_playing):
@@ -192,6 +197,5 @@ def create_lastfm_tuple(spotify_now_playing):
 
 if __name__ == '__main__':
     import json
-    from datetime import date
     with open('example_track.json') as f:
         example_track = json.load(f)
