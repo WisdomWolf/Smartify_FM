@@ -105,6 +105,10 @@ class SpotipyPlayback(_SpotipyBase):
         self._args = args
         self._kwargs = kwargs
 
+    @property
+    def progress(self):
+        return round(self.progress_ms / self.track.duration_ms * 100, 0)
+
 
 def mad_parser(thing):
     results = {}
@@ -157,33 +161,44 @@ def scrobbler(sp, lastfm_user, lastfm_network):
 
 class Scrobbler(object):
     def __init__(self, spotify, lastfm_user, lastfm_network, current_track=None):
-        self.previous_track = None
+        self.previous_playback = None
         self.spotify = spotify
         self.lastfm_user = lastfm_user
         self.lastfm_network = lastfm_network
-        self.current_track = current_track or SpotipyPlayback(**self.spotify.currently_playing())
+        self.current_playback = current_track or SpotipyPlayback(**self.spotify.currently_playing()) if self.spotify.currently_playing() else None
 
     def update_track(self, track=None):
-        track = track or SpotipyPlayback(**self.spotify.currently_playing())
-        if track and track.is_playing:
-            if not lastfm_user.get_now_playing():
+        playback_event = track or SpotipyPlayback(**self.spotify.currently_playing()) if self.spotify.currently_playing() else None
+        if playback_event and playback_event.is_playing:
+            track = playback_event.track
+            lastfm_now_playing = self.lastfm_user.get_now_playing()
+            if not lastfm_now_playing or lastfm_now_playing.title != track.name:
                 print('updating lastfm now playing')
-                self.lastfm_network.update_now_playing(track.track.artist, track.track.name,
-                        track.track.album, track.track.album.artist, track.track.duration)
-            if self.current_track != track:
-                self.previous_track = self.current_track
-                self.current_track = track
+                self.lastfm_network.update_now_playing(artist=track.artist, title=track.name,
+                        album=track.album.name, album_artist=track.album.artist, duration=track.duration)
+            # else:
+            #     print('lastfm appears to show {} is playing'.format(track.name))
+            if self.current_playback.track.name != track.name:
+                print('Looks like track has changed from {} to {}'.format(self.current_playback.track.name, track.name))
+                self.previous_playback = self.current_playback
+                self.current_playback = playback_event
                 self.scrobble_check()
+            else:
+                self.current_playback = playback_event
         else:
             print('nothing currently playing')
 
     def scrobble_check(self):
-        previous_track = self.previous_track.track
-        if self.lastfm_user.get_recent_tracks(limit=1)[0].track.get_name != previous_track.track.name:
-            print('should scrobble {}'.format(previous_track.title))
-            lastfm_network.scrobble(artist=previous_track.artist, title=previous_track.name,
-                timestamp=self.previous_track.epoch_timestamp, album=previous_track.album.name,
-                album_artist=previous_track.album.artist, duration=previous_track.duration)
+        previous_track = self.previous_playback.track
+        # TODO: Figure out how to check that previous track was played to > 70% so skips aren't scrobbled
+        if self.lastfm_user.get_recent_tracks(limit=2)[0].track.get_name != previous_track.name:
+            if self.previous_playback.progress > 70:
+                print('scrobbling: {}'.format(previous_track.name))
+                self.lastfm_network.scrobble(artist=previous_track.artist, title=previous_track.name,
+                    timestamp=self.previous_playback.epoch_timestamp, album=previous_track.album.name,
+                    album_artist=previous_track.album.artist, duration=previous_track.duration)
+            else:
+                print('Not scrobbling previous song because it does not meet 70% threshold') 
 
 
 def create_lastfm_tuple(spotify_now_playing):
