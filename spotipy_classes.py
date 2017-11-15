@@ -1,4 +1,5 @@
 from datetime import date
+import logging
 
 class _SpotipyBase(object):
 
@@ -61,7 +62,9 @@ class SpotipyAlbum(_SpotipyBase):
 
 class SpotipyTrack(_SpotipyBase):
 
-    def __init__(self, id, name, album, artists, available_markets=None, disc_number=None, duration_ms=0, explicit=False, external_ids=None, external_urls=None, href=None, popularity=None, preview_url=None, track_number=None, type=None, uri=None, *args, **kwargs):
+    def __init__(self, id, name, album, artists, available_markets=None, disc_number=None, 
+    duration_ms=0, explicit=False, external_ids=None, external_urls=None, href=None, 
+    popularity=None, preview_url=None, track_number=None, type=None, uri=None, *args, **kwargs):
         #print('__init__ received')
        # for param, value in locals().items():
           #  print('{}: {}\n'.format(param, value))
@@ -108,6 +111,32 @@ class SpotipyPlayback(_SpotipyBase):
     @property
     def progress(self):
         return round(self.progress_ms / self.track.duration_ms * 100, 0)
+
+
+class SpotipyPlaylist(_SpotipyBase):
+
+    def __init__(self, id, name, owner, collaborative=False, description=None, external_urls=None, 
+    followers=None, href=None, images=None, public=True, snapshot_id=None, tracks=None, type=None, 
+    uri=None, sp=None, precache=False):
+        self.id = id
+        self.name = name
+        self.owner = owner
+        self.collaborative = collaborative
+        self.description = description
+        self.external_urls = external_urls
+        self.followers = followers
+        self.href = href
+        self.images = images
+        self.public = public
+        self.snapshot_id = snapshot_id
+        self._tracks = tracks
+        self.type = type
+        self.uri = uri
+        self.tracks = [SpotipyTrack(**track.get('track')) for track in self._tracks.get('items')]
+        if precache:
+            while self._tracks['next']:
+                self._tracks = sp.next(self._tracks)
+                self.tracks.extend([SpotipyTrack(**track.get('track')) for track in self._tracks.get('items')])
 
 
 def mad_parser(thing):
@@ -173,32 +202,31 @@ class Scrobbler(object):
             track = playback_event.track
             lastfm_now_playing = self.lastfm_user.get_now_playing()
             if not lastfm_now_playing or lastfm_now_playing.title != track.name:
-                print('updating lastfm now playing')
+                logging.info('updating lastfm now playing')
                 self.lastfm_network.update_now_playing(artist=track.artist, title=track.name,
                         album=track.album.name, album_artist=track.album.artist, duration=track.duration)
             # else:
             #     print('lastfm appears to show {} is playing'.format(track.name))
             if self.current_playback.track.name != track.name:
-                print('Looks like track has changed from {} to {}'.format(self.current_playback.track.name, track.name))
+                logging.info('Looks like track has changed from {} to {}'.format(self.current_playback.track.name, track.name))
                 self.previous_playback = self.current_playback
                 self.current_playback = playback_event
                 self.scrobble_check()
             else:
                 self.current_playback = playback_event
-        else:
-            print('nothing currently playing')
+        # else:
+        #     print('nothing currently playing')
 
     def scrobble_check(self):
         previous_track = self.previous_playback.track
-        # TODO: Figure out how to check that previous track was played to > 70% so skips aren't scrobbled
         if self.lastfm_user.get_recent_tracks(limit=2)[0].track.get_name != previous_track.name:
             if self.previous_playback.progress > 70:
-                print('scrobbling: {}'.format(previous_track.name))
+                logging.info('scrobbling: {}'.format(previous_track.name))
                 self.lastfm_network.scrobble(artist=previous_track.artist, title=previous_track.name,
                     timestamp=self.previous_playback.epoch_timestamp, album=previous_track.album.name,
                     album_artist=previous_track.album.artist, duration=previous_track.duration)
             else:
-                print('Not scrobbling previous song because it does not meet 70% threshold') 
+                logging.warn('Not scrobbling previous song because it does not meet 70% threshold') 
 
 
 def create_lastfm_tuple(spotify_now_playing):

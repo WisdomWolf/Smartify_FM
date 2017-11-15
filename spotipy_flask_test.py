@@ -17,6 +17,7 @@ import spotipy
 import sched
 import time
 import pdb
+from pylast import WSError
 
 # if os.path.exists('settings.ini'):
 #     config = ConfigParser()
@@ -269,6 +270,7 @@ def get_user_play_count_in_track_info(artist, title):
         count = track.get_userplaycount()
     except WSError:
         print('Unable to locate {0} - {1}'.format(artist, title))
+        count = -1
     return count
 
 @spotify.tokengetter

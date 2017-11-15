@@ -8,13 +8,18 @@ from threading import Thread
 import time
 import concurrent.futures
 import configparser
+from pylast import NetworkError
 
 def get_track_playcount(track):
     try:
         return track.get_userplaycount()
     except pylast.WSError:
         print('Error: Unable to find info for {} - {}'.format(track.artist, track.title))
-        return 0
+        return -1
+    except NetworkError:
+        print('Network Error, delaying 10 seconds')
+        time.sleep(10)
+        return get_track_playcount(track)
 
 
 def get_playcounts_threaded(track_list, workers=None):
@@ -23,7 +28,7 @@ def get_playcounts_threaded(track_list, workers=None):
     start_time = time.time()
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         for track, count in zip(track_list, executor.map(get_track_playcount, track_list)):
-            user_playcount_dict[track] = count
+            user_playcount_dict['{} - {}'.format(track.title, track.artist)] = count
     print('Took: {}'.format(time.time() - start_time))
     return user_playcount_dict
 
@@ -64,14 +69,14 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET,
 user = pylast.User(lastfm_username, network)
 
 
-def get_all_tracks(user, chunk_size=1000):
+def get_all_tracks(user, chunk_size=1000, last_timestamp=0):
     playcount = user.get_playcount()
     tracks = set()
-    last_timestamp = 0
+    last_timestamp = last_timestamp
     chunks = playcount // chunk_size + 1
     for i in range(chunks):
         print('Getting chunk {} of {}'.format(i + 1, chunks))
-        recent_tracks = user.get_recent_tracks(limit=1000, time_to=last_timestamp)
+        recent_tracks = user.get_recent_tracks(limit=chunk_size, time_to=last_timestamp)
         tracks = tracks.union(recent_tracks)
         last_timestamp = int(recent_tracks[-1].timestamp)
     return sorted(list(tracks), key=lambda x: x.timestamp, reverse=True)
@@ -83,6 +88,10 @@ def create_library_set(track_history, user):
     for track in library_set:
         track.username = user.name
     return library_set
+
+def get_playlist_playcounts(playlist):
+    pylast_tracks = [pylast.Track(artist=track.artist, title=track.name, network=network, username=lastfm_username) for track in playlist.tracks]
+    return get_playcounts_threaded(pylast_tracks, 64)
 
 if __name__ == "__main__":
 
