@@ -8,3 +8,4 @@ Universal Spotify Scrobbling required to capture playback through Google Home an
     - All of the above are COMPLETED!
     - Process still needed to handle login and multiple listener's for multiple users
     - Private Session accounted for when attempting to scrobble track, but still looking for a way to determine earlier so that we don't update playing when session is private.  May just set a flag based on the existence of the previous track in recent_tracks.
+    - Smartify Daemon currently uses a backgroundscheduler and ironically only works interactively as a result.  Will possibly adjust scheduler type based on interactive session determination once a reliable way to determine interactivity state while using ipython is discovered.
