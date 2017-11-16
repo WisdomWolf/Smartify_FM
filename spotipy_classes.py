@@ -1,5 +1,7 @@
 from datetime import date
 import logging
+import arrow
+from apscheduler.schedulers.background import BackgroundScheduler
 
 class _SpotipyBase(object):
 
@@ -195,9 +197,13 @@ class Scrobbler(object):
         self.lastfm_user = lastfm_user
         self.lastfm_network = lastfm_network
         self.current_playback = current_track or SpotipyPlayback(**self.spotify.currently_playing()) if self.spotify.currently_playing() else None
+        self.scheduler = BackgroundScheduler()
+        self.scheduler.start()
 
     def update_track(self, track=None):
         playback_event = track or SpotipyPlayback(**self.spotify.currently_playing()) if self.spotify.currently_playing() else None
+        if not self.current_playback:
+            self.current_playback = playback_event
         if playback_event and playback_event.is_playing:
             track = playback_event.track
             lastfm_now_playing = self.lastfm_user.get_now_playing()
@@ -211,7 +217,7 @@ class Scrobbler(object):
                 logging.info('Looks like track has changed from {} to {}'.format(self.current_playback.track.name, track.name))
                 self.previous_playback = self.current_playback
                 self.current_playback = playback_event
-                self.scrobble_check()
+                self.scheduler.add_job(self.scrobble_check, 'date', run_date=arrow.now().shift(seconds=30).datetime)
             else:
                 self.current_playback = playback_event
         # else:
@@ -219,7 +225,10 @@ class Scrobbler(object):
 
     def scrobble_check(self):
         previous_track = self.previous_playback.track
-        if self.lastfm_user.get_recent_tracks(limit=2)[0].track.get_name != previous_track.name:
+        # verify track in recently_played to honor 'private' session
+        most_recent_spotify_track = SpotipyTrack(**self.spotify.current_user_recently_played(limit=1).get('items')[0].get('track')).name
+        if previous_track.name == most_recent_spotify_track and \
+                self.lastfm_user.get_recent_tracks(limit=2)[0].track.get_name() != previous_track.name:
             if self.previous_playback.progress > 70:
                 logging.info('scrobbling: {}'.format(previous_track.name))
                 self.lastfm_network.scrobble(artist=previous_track.artist, title=previous_track.name,

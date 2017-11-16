@@ -5,5 +5,6 @@ Universal Spotify Scrobbling required to capture playback through Google Home an
         - May need to look at timestamp or other metrics to ensure song play is not scrobled twice
         - May need to hold data for scrobbling and wait to transmit scrobble until Last.FM can be polled to see if play was already scrobbled
             - Alternatively, Last.FM can be polled for currently playing to make determination at time of scrobble
+    - All of the above are COMPLETED!
     - Process still needed to handle login and multiple listener's for multiple users
-    - Current thoughts for expediency are to pull entire scrobble history when user first registered to cache server side, subsequent updates can be handled as a delta using timestamp from last scrobble as a filter
+    - Private Session accounted for when attempting to scrobble track, but still looking for a way to determine earlier so that we don't update playing when session is private.  May just set a flag based on the existence of the previous track in recent_tracks.
