@@ -91,6 +91,7 @@ class SpotipyTrack(_SpotipyBase):
         self.track_number = track_number
         self.type = type
         self.uri = uri
+        self.playcount = 0
         self._args = args
         self._kwargs = kwargs
 
@@ -115,6 +116,15 @@ class SpotipyPlayback(_SpotipyBase):
         return round(self.progress_ms / self.track.duration_ms * 100, 0)
 
 
+class SpotipyItem(_SpotipyBase):
+
+    def __init__(self, track, added_at=None, added_by='', is_local=False):
+        self.track = track if isinstance(track, SpotipyTrack) else SpotipyTrack(**track)
+        self.added_at = added_at
+        self.added_by = added_by
+        self.is_local = is_local
+
+
 class SpotipyPlaylist(_SpotipyBase):
 
     def __init__(self, id, name, owner, collaborative=False, description=None, external_urls=None, 
@@ -134,7 +144,7 @@ class SpotipyPlaylist(_SpotipyBase):
         self._tracks = tracks
         self.type = type
         self.uri = uri
-        self.tracks = [SpotipyTrack(**track.get('track')) for track in self._tracks.get('items')]
+        self.tracks = [SpotipyItem(**item) for item in self._tracks.get('items')]
         if precache:
             while self._tracks['next']:
                 self._tracks = sp.next(self._tracks)
