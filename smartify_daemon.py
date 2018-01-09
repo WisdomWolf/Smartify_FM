@@ -51,3 +51,28 @@ def log_filter(record):
 
 logger = logging.getLogger()
 logger.handlers[0].addFilter(log_filter)
+
+def get_playlist_uri(playlist_name):
+    playlists = sp.current_user_playlists()
+    playlist_name_uri_map = {playlist.get('name'): playlist.get('uri') for playlist in playlists.get('items')}
+    return playlist_name_uri_map.get(playlist_name)
+
+
+def get_playlist_json(playlist_name):
+    playlist_uri = get_playlist_uri(playlist_name).split(':')
+    return sp.user_playlist(playlist_uri[2], playlist_uri[-1])
+
+
+def create_spotipy_playlist(playlist_name):
+    return SpotipyPlaylist(**get_playlist_json, sp=sp, precache=True)
+
+
+def get_undiscovered_tracks(playlist):
+    playcounts = get_playlist_playcounts(playlist)
+    undiscovered = [track for track, count in playcounts.items() if count < 1]
+    return [track for track in playlist.tracks if '{} - {}'.format(track.name, track.artist) in undiscovered]
+
+
+def get_track_uris(track_list):
+    return [track.uri for track in track_list
+
