@@ -4,12 +4,13 @@ redirect_url = 'http://127.0.0.1:5000/login/authorized'
 scopes = ' '.join(SCOPES)
 import spotipy
 from spotipy import oauth2
-from spotipy_classes import SpotipyArtist, SpotipyAlbum, SpotipyTrack, SpotipyPlayback, Scrobbler
+from spotipy_classes import SpotipyArtist, SpotipyAlbum, SpotipyTrack, SpotipyPlayback, SpotipyPlaylist, Scrobbler
 from spotipy import util
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 import logging
 import configparser
+from pylast_stub import get_playlist_playcounts
 
 logging.basicConfig(format='%(asctime)s:%(levelname)s:%(name)s - %(message)s', filename='smartify_testing.log', level=logging.INFO)
 
@@ -26,7 +27,7 @@ env_vars = config['Environment Vars']
 password_hash = env_vars['lastfm_default_pwhash']
 network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SECRET, username='wisdomwolf', password_hash=password_hash)
 user = pylast.User('wisdomwolf', network)
-my_scrobbler = Scrobbler(sp, user, network)
+
 
 def restart_scheduler():
     global scheduler
@@ -64,7 +65,7 @@ def get_playlist_json(playlist_name):
 
 
 def create_spotipy_playlist(playlist_name):
-    return SpotipyPlaylist(**get_playlist_json, sp=sp, precache=True)
+    return SpotipyPlaylist(**get_playlist_json(playlist_name), sp=sp, precache=True)
 
 
 def get_undiscovered_tracks(playlist):
@@ -74,5 +75,7 @@ def get_undiscovered_tracks(playlist):
 
 
 def get_track_uris(track_list):
-    return [track.uri for track in track_list
+    return [track.uri for track in track_list]
 
+if __name__ == '__main__':
+    my_scrobbler = Scrobbler(sp, user, network)
