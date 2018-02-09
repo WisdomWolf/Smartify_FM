@@ -148,7 +148,7 @@ class SpotipyPlaylist(_SpotipyBase):
         if precache:
             while self._tracks['next']:
                 self._tracks = sp.next(self._tracks)
-                self.tracks.extend([SpotipyTrack(**track.get('track')) for track in self._tracks.get('items')])
+                self.tracks.extend([SpotipyItem(**item) for item in self._tracks.get('items')])
 
 
 def mad_parser(thing):
