@@ -71,11 +71,13 @@ def create_spotipy_playlist(playlist_name):
 def get_undiscovered_tracks(playlist):
     playcounts = get_playlist_playcounts(playlist)
     undiscovered = [track for track, count in playcounts.items() if count < 1]
-    return [track for track in playlist.tracks if '{} - {}'.format(track.name, track.artist) in undiscovered]
+    return [item.track for item in playlist.tracks if '{} - {}'.format(item.track.name, item.track.artist) in undiscovered]
 
 
 def get_track_uris(track_list):
-    return [track.uri for track in track_list]
+    return [item.track.uri for item in track_list]
 
 if __name__ == '__main__':
     my_scrobbler = Scrobbler(sp, user, network)
+    my_scrobbler.scheduler.add_job(my_scrobbler.update_track, 'interval', seconds=10)
+
