@@ -1,6 +1,7 @@
 FROM python:3.6
 ADD requirements.txt /tmp/requirements.txt
-ADD .aws_credentials ~/.aws/credentials
+ADD .aws_credentials /etc/boto.cfg
+RUN sed 's/default/Credentials/' -i /etc/boto.cfg
 RUN pip install -r /tmp/requirements.txt
 ADD . /code
 WORKDIR /code
