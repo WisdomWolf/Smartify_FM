@@ -1,4 +1,4 @@
-from spotipy_flask_test import SPOTIFY_APP_ID, SPOTIFY_APP_SECRET, LASTFM_API_KEY, LASTFM_API_SECRET, SCOPES
+from spotipy_flask_test import SPOTIFY_APP_ID, LASTFM_API_KEY, LASTFM_API_SECRET, SCOPES
 import pylast
 redirect_url = 'http://127.0.0.1:5000/login/authorized'
 scopes = ' '.join(SCOPES)
@@ -16,7 +16,7 @@ logging.basicConfig(format='%(asctime)s:%(levelname)s:%(name)s - %(message)s', f
 
 scheduler = BackgroundScheduler()
 username = 'wisdomwolf'
-oauth = util.prompt_for_user_token(username=username,scope=scopes,client_id=SPOTIFY_APP_ID,client_secret=SPOTIFY_APP_SECRET,redirect_uri=redirect_url)
+oauth = util.prompt_for_user_token(username=username,scope=scopes,client_id=SPOTIFY_APP_ID, redirect_uri=redirect_url, token_url="https://dk1ytlmiwk.execute-api.us-east-1.amazonaws.com/dev/token")
 sp = spotipy.Spotify(oauth=oauth)
 
 
