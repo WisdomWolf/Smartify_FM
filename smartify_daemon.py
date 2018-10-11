@@ -1,17 +1,18 @@
 from spotipy_flask_test import SPOTIFY_APP_ID, LASTFM_API_KEY, LASTFM_API_SECRET, SCOPES
 import pylast
-redirect_url = 'http://127.0.0.1:5000/login/authorized'
-scopes = ' '.join(SCOPES)
 import spotipy
 from spotipy import oauth2
-from spotipy.object_classes import SpotiwiseArtist, SpotiwiseAlbum, SpotiwiseTrack, SpotiwisePlayback, SpotiwisePlaylist
-from spotipy_classes import SpotipyArtist, SpotipyAlbum, SpotipyTrack, SpotipyPlayback, SpotipyPlaylist, Scrobbler
+from spotipy.object_classes import SpotiwiseArtist, SpotiwiseAlbum, SpotiwiseTrack, SpotiwisePlayback, SpotiwisePlaylist, SpotiwiseItem
+#from spotipy_classes import SpotipyArtist, SpotipyAlbum, SpotipyTrack, SpotipyPlayback, SpotipyPlaylist, Scrobbler
 from spotipy import util
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 import logging
 import configparser
 from pylast_stub import get_playlist_playcounts
+
+redirect_url = 'http://127.0.0.1:5000/login/authorized'
+scopes = ' '.join(SCOPES)
 
 logging.basicConfig(format='%(asctime)s:%(levelname)s:%(name)s - %(message)s', filename='smartify_testing.log', level=logging.INFO)
 
@@ -66,11 +67,11 @@ def get_playlist_json(playlist_name):
 
 def get_playlist(playlist_name):
     playlist_uri = get_playlist_uri(playlist_name).split(':')
-    return sp.user_playlist(playlist_uri[2], playlist_uri[-1])
+    return sp.user_playlist(playlist_uri[2], playlist_uri[-1], precache=True)
 
 
 def create_spotipy_playlist(playlist_name):
-    return SpotipyPlaylist(**get_playlist_json(playlist_name), sp=sp, precache=True)
+    return SpotiwisePlaylist(**get_playlist_json(playlist_name), sp=sp, precache=True)
 
 
 def get_undiscovered_tracks(playlist):
