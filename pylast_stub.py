@@ -90,7 +90,7 @@ def create_library_set(track_history, user):
     return library_set
 
 def get_playlist_playcounts(playlist):
-    pylast_tracks = [pylast.Track(artist=item.track.artist, title=item.track.name, network=network, username=lastfm_username) for item in playlist.tracks]
+    pylast_tracks = [pylast.Track(artist=item.track.artist, title=item.track.name, network=network, username=lastfm_username) for item in playlist.items]
     return get_playcounts_threaded(pylast_tracks, 64)
 
 if __name__ == "__main__":
