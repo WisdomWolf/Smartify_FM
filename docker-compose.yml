@@ -1,0 +1,13 @@
+version: "3"
+services:
+    worker:
+        image: wisdomwolf/smartify_fm
+        build: .
+        command: ipython -i smartify_daemon.py
+        volumes:
+            - /home/wisdomwolf/.docker/smartify_fm/debug.log:/code/debug.log
+            - /home/wisdomwolf/.docker/smartify_fm/config:/code/config
+            - /home/wisdomwolf/.docker/smartify_fm/.cache-wisdomwolf:/code/.cache-wisdomwolf
+        restart: unless-stopped
+        tty: true
+        stdin_open: true
