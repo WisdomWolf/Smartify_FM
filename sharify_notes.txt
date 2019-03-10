@@ -1,0 +1,22 @@
+shareify
+
+
+Methods of generating fair playlists:
+* Duplication
+    * Determine total number of tracks added by highest contributor
+    * Duplicate tracks of contributors that added fewer than above total until parity reached
+        * Duplicate tracks at random
+        * Duplicate tracks in [reverse] order of addition
+* Truncate
+    * Determine total number of tracks added by lowest contributor
+    * Remove additional tracks from any contributor that added more than above total until parity reached
+        * Remove at random
+        * Remove in [reverse] chronological order of addition
+    * Probably not a great candidate for being used outside of on-demand <- Not sure what I was thinking here, why in the ackety fuck would this be good for on-demand?
+* Analyze playlist to determine contributors and number of tracks added by each
+    * Display in contributor - track total format, perhaps with color coding (percentage based?)
+    * Color code playlist name to indicate fairness
+    * Good possible first step to lead into choices for how to correct fairness
+
+
+Could potentially have a configurable allowed disparity percentage rather than requiring exact match on number of songs added by each contributor.  <- I'm not sure what I was thinking here and wish I would have elaborated further while the thought was still fresh in my mind.
