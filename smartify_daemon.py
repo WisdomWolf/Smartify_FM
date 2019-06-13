@@ -1,15 +1,19 @@
 from spotipy_flask_test import SPOTIFY_APP_ID, LASTFM_API_KEY, LASTFM_API_SECRET, SCOPES
 import pylast
-import spotipy
-from spotipy import oauth2
-from spotipy.object_classes import SpotiwiseArtist, SpotiwiseAlbum, SpotiwiseTrack, SpotiwisePlayback, SpotiwisePlaylist, SpotiwiseItem
-#from spotipy_classes import SpotipyArtist, SpotipyAlbum, SpotipyTrack, SpotipyPlayback, SpotipyPlaylist, Scrobbler
-from spotipy import util
+import spotiwise
+from spotiwise import oauth2
+from spotiwise.object_classes import SpotiwiseArtist, SpotiwiseAlbum, SpotiwiseTrack, SpotiwisePlayback, SpotiwisePlaylist, SpotiwiseItem
+#from spotiwise_classes import SpotipyArtist, SpotipyAlbum, SpotipyTrack, SpotipyPlayback, SpotipyPlaylist, Scrobbler
+from spotiwise import util
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers import SchedulerNotRunningError
 import logging
 import configparser
 from pylast_stub import get_playlist_playcounts
+from aws_requests_auth.aws_auth import AWSRequestsAuth
+from aws_requests_auth import boto_utils
+from urllib import parse as urlparse
+import re
 
 redirect_url = 'http://127.0.0.1:5000/login/authorized'
 scopes = ' '.join(SCOPES)
@@ -18,8 +22,30 @@ logging.basicConfig(format='%(asctime)s:%(levelname)s:%(name)s - %(message)s', f
 
 scheduler = BackgroundScheduler()
 username = 'wisdomwolf'
-oauth = util.prompt_for_user_token(username=username,scope=scopes,client_id=SPOTIFY_APP_ID, redirect_uri=redirect_url, token_url="https://dk1ytlmiwk.execute-api.us-east-1.amazonaws.com/dev/token")
-sp = spotipy.Spotify(oauth=oauth)
+
+def get_aws_auth(url):
+    api_gateway_netloc = urlparse.urlparse(url).netloc
+    api_gateway_region = re.match(
+        r"[a-z0-9]+\.execute-api\.(.+)\.amazonaws\.com",
+        api_gateway_netloc
+    ).group(1)
+
+    return AWSRequestsAuth(
+        aws_host=api_gateway_netloc,
+        aws_region=api_gateway_region,
+        aws_service='execute-api',
+        **boto_utils.get_credentials()
+    )
+
+oauth = util.prompt_for_user_token(
+    username=username,
+    scope=scopes,
+    client_id=SPOTIFY_APP_ID,
+    redirect_uri=redirect_url,
+    token_url="https://dk1ytlmiwk.execute-api.us-east-1.amazonaws.com/dev/token",
+    auth_func=get_aws_auth
+)
+sp = spotiwise.Spotify(oauth=oauth)
 
 
 config = configparser.ConfigParser()
@@ -70,7 +96,7 @@ def get_playlist(playlist_name):
     return sp.user_playlist(playlist_uri[2], playlist_uri[-1], precache=True)
 
 
-def create_spotipy_playlist(playlist_name):
+def create_spotiwise_playlist(playlist_name):
     return SpotiwisePlaylist(**get_playlist_json(playlist_name), sp=sp, precache=True)
 
 

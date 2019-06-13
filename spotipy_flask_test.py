@@ -13,7 +13,7 @@ from flask_oauthlib.client import OAuth, OAuthException
 from flask_bootstrap import Bootstrap
 from configparser import ConfigParser
 import pylast
-import spotipy
+import spotiwise
 import sched
 import time
 import pdb
@@ -54,11 +54,11 @@ SCOPES = [
  'user-read-recently-played']
 
 # PyLast
-LASTFM_API_KEY = os.getenv('LASTFM_API_KEY') or env_vars['lastfm_api_key']
-LASTFM_API_SECRET = os.getenv('LASTFM_API_SECRET') or env_vars['lastfm_api_secret']
-lastfm_username = os.getenv('LASTFM_DEFAULT_USERNAME') or env_vars['lastfm_default_username']
-password_hash = os.getenv('LASTFM_DEFAULT_PWHASH') or env_vars['lastfm_default_pwhash']
-spotify_username = os.getenv('SPOTIFY_DEFAULT_USERNAME') or env_vars['spotify_default_username']
+LASTFM_API_KEY = os.getenv('LASTFM_API_KEY') or env_vars['LASTFM_API_KEY']
+LASTFM_API_SECRET = os.getenv('LASTFM_API_SECRET') or env_vars['LASTFM_API_SECRET']
+lastfm_username = os.getenv('LASTFM_DEFAULT_USERNAME') or env_vars['LASTFM_DEFAULT_USERNAME']
+password_hash = os.getenv('LASTFM_DEFAULT_PWHASH') or env_vars['LASTFM_DEFAULT_PWHASH']
+spotify_username = os.getenv('SPOTIFY_DEFAULT_USERNAME') or env_vars['SPOTIFY_DEFAULT_USERNAME']
 sp = None
 
 network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SECRET,
@@ -66,8 +66,8 @@ network = pylast.LastFMNetwork(api_key=LASTFM_API_KEY, api_secret=LASTFM_API_SEC
                                password_hash=password_hash)
 
 # Spotify
-SPOTIFY_APP_ID = os.getenv('SPOTIPY_CLIENT_ID') or env_vars['spotipy_client_id']
-SPOTIFY_APP_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET') or env_vars['spotipy_client_secret']
+SPOTIFY_APP_ID = os.getenv('SPOTIPY_CLIENT_ID') or env_vars['SPOTIPY_CLIENT_ID']
+SPOTIFY_APP_SECRET = os.getenv('SPOTIPY_CLIENT_SECRET') or env_vars['SPOTIPY_CLIENT_SECRET']
 
 DEFAULT_ALBUM_ART = "http://upload.wikimedia.org/wikipedia/en/5/54/Public_image_ltd_album_cover.jpg"
 
@@ -123,7 +123,7 @@ def get_cover_art(playing):
     try:
         album = playing.get_album()
         if not album:
-            sp = spotipy.Spotify()
+            sp = spotiwise.Spotify()
             search_str = '{0} {1}'.format(playing.artist, playing.title)
             track = sp.search(search_str)['tracks']['items']
             if track:
@@ -193,7 +193,7 @@ def spotify_authorized():
     token = session['oauth_token'][0]
     me = spotify.get('https://api.spotify.com/v1/me')
     spotify_username = me.data['id']
-    sp = spotipy.Spotify(auth=token)
+    sp = spotiwise.Spotify(auth=token)
     with open('{}_token.dat'.format(spotify_username), 'w') as f:
         f.write(token)
     print('Token stored')
